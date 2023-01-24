@@ -31,6 +31,45 @@ function animate() {
 }
 
 /************* DO NOT TOUCH CODE ABOVE THIS LINE ***************/
+function swapPhoto() {
+	if(mCurrentIndex >= mImages.length)
+	{
+		mCurrentIndex = 0;
+	}
+
+	if(mCurrentIndex < 0) {
+		mCurrentIndex = mImages.length-1;
+	}
+
+
+
+document.getElementById('photo').src = mImages[mCurrentIndex].img;
+var loc = document .getElementsByClassName('location');
+loc[0].innerHTML = "Location: " + mImages[mCurrentIndex].location;
+var des = document.getElementsByClassName('description');
+des[0].innerHTML = "Description: " + mImages[mCurrentIndex].description;
+var dt = document.getElementByClassName('date');
+dt[0].innerHTML = "Date: " + mImages[mCurrentIndex].date;
+
+mLastFrameTime = 0;
+mCurrentIndex += 1;
+}
+
+function toggleDetails()
+{
+	if($(".moreIndicator").hasClass("rot90"))
+	{
+		$( ".moreIndicator").removeClass("rot90");
+		$(".moreIndicator").addClass("rot270");
+
+	}
+	else {
+		$(".moreIndicator").removeClass("rot270");
+		$(".moreIndicator").addClass("rot90");
+	}
+	$(".details").slideToggle( "slow", "linear");
+}
+
 
 function swapPhoto() {
 	const imageHTML = document.getElementById('photo')
@@ -53,7 +92,8 @@ var mCurrentIndex = 0;
 var mRequest = new XMLHttpRequest();
 
 
-mRequest.onreadystatechange = function() {
+mRequest.onreadystatechange = function fetchJSON() {
+	console.log("on ready state change");
     if (this.readyState == 4 && this.status == 200) {
 		mJson = JSON.parse(mRequest.responseText);
 		iterateThrough();
@@ -75,7 +115,7 @@ var mJson
 
 // URL for the JSON to load by default
 // Some options for you are: images.json, images.short.json; you will need to create your own extra.json later
-var mUrl = '../images.json';
+var mUrl = "images.json";
 
 
 //You can optionally use the following function as your event callback for loading the source of Images from your json data (for HTMLImageObject).
@@ -89,10 +129,28 @@ function makeGalleryImageOnloadCallback(galleryImage) {
 
 $(document).ready( function() {
 	
-	// This initially hides the photos' metadata information
+	$( "#nextPhoto" ).position({
+		my: "right bottom",
+		at: "right bottom",
+		of: "#nav"
+	});
+
 	$('.details').eq(0).hide();
 	
 });
+
+const urlParams = new URLSearchParams(window.location.search);
+
+	for (const [key, value] of urlParams) {
+		console.log('${key}:${value}');
+		mUrl = value;
+	}
+	if(mUrl == undefined)
+	{
+		mUrl = "images.json";
+	}
+
+fetchJSON();
 
 window.addEventListener('load', function() {
 	
@@ -107,13 +165,42 @@ function GalleryImage() {
 	let date = "";
 	let img = "";
 }
-function iterateThrough()
+function iterateJSON(mJSON)
 {
-	for(const currentIndex in mJson.images){
-		mImages[currentIndex] = new GalleryImage();
-		mImages[currentIndex].img = mJson.images[currentIndex].imgPath;
-		mImages[currentIndex].description = mJson.images[currentImages].description
-		mImages[currentIndex].location = mJson.images[currentIndex].imgLocation;
-		mImages[currentIndex].date = mJson.images[currentIndex].date;
+	for(x = 0; x < mJson.images.length; x++)
+	{
+		mImages[x] = new GalleryImage();
+		mImages[x].img = mJson.images[x].imgPath;
+		mImages[x].description = mJson.images[x].description;
+		mImages[x].location = mJson.images[x].imgLocation;
+		mImages[x].date = mJson.images[x].date;
 	}
+}
+
+function rotatePositionCheck(){
+	let htmlObject = document.querySelector(".moreIndicator");
+
+	if(htmlObject.classList.contains("rot90") == true){
+		htmlObject.classList.remove("rot90");
+		htmlObject.classList.add("rot270");
+
+		console.log("1LAUNCH")
+	}
+
+	else{
+		htmlObject.classList.remove("rot270");
+		htmlObject.classList.add("rot90");
+
+		console.log("2LAUNCH");
+	}
+}
+
+function reveil(){
+	$('.details').fadeToggle();
+}
+
+function nextPhoto(){
+
+	swapPhoto();
+	
 }
